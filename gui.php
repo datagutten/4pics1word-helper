@@ -10,12 +10,19 @@
 if(isset($_POST['button']))
 {
 	$gui=true;
-	$queryletters=$_POST['letters'];
+	$queryletters=strtolower(preg_replace('/[^a-z]/i','',$_POST['letters'])); //Remove everything that is not a-z and make the string lowercase
 	$letters=$_POST['number'];
 	include '4pics1word.php';
+	include 'photodata.php';
+	require 'picturemaker.php';
 	foreach ($possibles as $key=>$possible)
 	{
-		echo "<p><img src=\"http://www.whatsthewordanswers.com/images/fourpics/{$key}.jpg\" />\n";
+		//echo "<p><img src=\"http://www.whatsthewordanswers.com/images/fourpics/{$key}.jpg\" />\n";
+		$task=$tasks[array_search(strtoupper($possible),$solutions)];
+		if(!file_exists($image="taskimages/{$task['id']}.png"))
+			makepicture($task);
+		echo "<p><img src=\"$image\" />\n";
+		
 		echo "<h2>$possible</h2></p>\n";
 	}
 		
