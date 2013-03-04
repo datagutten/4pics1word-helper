@@ -1,0 +1,3 @@
+<?Php
+$words[6]=array('trendy','vision','volume','window','zombie','staple','travel','pocket','poison','repair','scared','spring','mother','office','pirate','hippie','island','jockey','driver','father','cotton','diving','bitter','breach','breeze','bubble','animal','muscle','strain','action','credit','player','strand','mantle','screen','powder','socket','couple','medium','strike','murder','cradle','spikes','clutch','stroke','divine','leaves','charge','course','bridge','strong','yellow','vacuum','record','square','change','hiphop','summer','winter','vowels','minute','spiral','barrel','narrow','choice','france','plenty','sports','letter');
+?>
