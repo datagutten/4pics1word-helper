@@ -26,7 +26,8 @@ function makepicture($task)
 		$im[$picture_key]=imagecreatefromjpeg($imagefile);
 		imagecopy($taskimage,$im[$picture_key],$posx[$picture_key],$posy[$picture_key],0,0,290,290);
 		$textypos=290+$posy[$picture_key]+7+1; //The Y position is the picture size+the image Y position+the font size+1
-		imagettftext($taskimage,7,0,$posx[$picture_key],$textypos,$text,$font,$task['copyrights'][$picture_key]); //Write the copyright text on the image
+		if(!imagettftext($taskimage,7,0,$posx[$picture_key],$textypos,$text,$font,$task['copyrights'][$picture_key])) //Write the copyright text on the image
+			die('Error writing copyright text');
 	}
 	
 	imagepng($taskimage,"taskimages/{$task['id']}.png"); //PNG makes larger files, but the background looks cleaner

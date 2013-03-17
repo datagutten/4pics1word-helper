@@ -10,10 +10,9 @@
 if(isset($_POST['button']))
 {
 	$gui=true;
-	$queryletters=strtolower(preg_replace('/[^a-z]/i','',$_POST['letters'])); //Remove everything that is not a-z and make the string lowercase
+	$queryletters=strtoupper(preg_replace('/[^a-z]/i','',$_POST['letters'])); //Remove everything that is not a-z and make the string uppercase
 	$letters=$_POST['number'];
-	include '4pics1word.php';
-	include 'photodata.php';
+	require '4pics1word.php';
 	require 'picturemaker.php';
 	foreach ($possibles as $key=>$possible)
 	{
@@ -29,7 +28,7 @@ if(isset($_POST['button']))
 }
 ?>
 <form id="form1" name="form1" method="post" action="">
-  <p>Letters:
+  <p>Available letters:
     <input type="text" name="letters" id="letters" />
   </p>
   <p>Number of letters:
@@ -38,6 +37,7 @@ if(isset($_POST['button']))
   <p>
     <input type="submit" name="button" id="button" value="Submit" />
   </p>
+  <p>Source code available on <a href="https://github.com/datagutten/4pics1word-helper/">github</a>.</p>
 </form>
 </body>
 </html>

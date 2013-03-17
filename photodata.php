@@ -6,5 +6,7 @@ $tasks=json_decode($data,true); //Decode the json
 foreach($tasks as $key=>$task)
 {
 	$solutions[$key]=$task['solution']; //Make a searchable array of the solutions
+	$len=strlen($task['solution']); //Find the length of the word
+	$words[$len][$key]=$task['solution']; //Add the word to an array with the length as the key
 }
 ?>
