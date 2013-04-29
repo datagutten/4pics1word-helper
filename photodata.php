@@ -2,12 +2,12 @@
 //Select the correct data file for the game
 switch($game)
 {
-	case 'icomania': $file='data/icomania_en.json'; break;
-	case '4pics1word': $file='photodata.txt'; break;
+	case 'icomania': $file='data/icomania/icomania_en.json'; break;
+	case '4pics1word': $file='data/4pics1word/photodata.txt'; break;
 	default: die("$game is not a supported game.\n");
 }
 if(!file_exists($file))
-	die("The data file $file for  $game could not be found\n");
+	die("The data file $file for $game could not be found\n");
 
 
 $data=file_get_contents($file); //Read the file with the image information
