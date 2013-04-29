@@ -1,7 +1,16 @@
 ﻿<?Php
-if(!file_exists('photodata.txt'))
-	die("photodata.txt could not be found");
-$data=file_get_contents('photodata.txt'); //Read the file with the image information
+//Select the correct data file for the game
+switch($game)
+{
+	case 'icomania': $file='data/icomania_en.json'; break;
+	case '4pics1word': $file='photodata.txt'; break;
+	default: die("$game is not a supported game.\n");
+}
+if(!file_exists($file))
+	die("The data file $file for  $game could not be found\n");
+
+
+$data=file_get_contents($file); //Read the file with the image information
 $tasks=json_decode($data,true); //Decode the json
 foreach($tasks as $key=>$task)
 {
