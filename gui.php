@@ -7,24 +7,27 @@
 
 <body>
 <?Php
+ini_set('display_errors',1);
+error_reporting(E_ALL);
+require 'class.php';
+
 if(isset($_POST['button']))
 {
 	$gui=true;
+	$pics=new pics($_POST['game']);
 	$queryletters=strtoupper(preg_replace('/[^a-z]/i','',$_POST['letters'])); //Remove everything that is not a-z and make the string uppercase
 	$letters=$_POST['number'];
-	require '4pics1word.php';
-	require 'picturemaker.php';
-	foreach ($possibles as $key=>$possible)
+
+	if($possibles=$pics->possibles($queryletters,$_POST['number']))
 	{
-		//echo "<p><img src=\"http://www.whatsthewordanswers.com/images/fourpics/{$key}.jpg\" />\n";
-		$task=$tasks[array_search(strtoupper($possible),$solutions)];
-		if(!file_exists($image="taskimages/{$task['id']}.png"))
-			makepicture($task);
-		echo "<p><img src=\"$image\" />\n";
-		
-		echo "<h2>$possible</h2></p>\n";
+		foreach ($possibles as $key=>$task)
+		{
+			if($image=$pics->image($task))
+				echo "<p><img src=\"$image\" />\n";
+			
+			echo "<h2>{$task['solution']}</h2></p>\n";
+		}
 	}
-		
 }
 ?>
 <form id="form1" name="form1" method="post" action="">
@@ -33,6 +36,13 @@ if(isset($_POST['button']))
   </p>
   <p>Number of letters:
     <input type="text" name="number" id="number" />
+  </p>
+  <p>Game: 
+    <select name="game" id="select">
+      <option value="4pics1word" <?php if(!isset($_POST['game']) || $_POST['game']=='4pics1word') echo 'selected="selected"'; ?>>4 Pics 1 Word</option>
+      <option value="icomania"<?php if(isset($_POST['game']) && $_POST['game']=='icomania') echo 'selected="selected"'; ?>>Icomania</option>
+      <option value="piccombo"<?php if(isset($_POST['game']) && $_POST['game']=='piccombo') echo 'selected="selected"'; ?>>Pic Combo</option>
+    </select>
   </p>
   <p>
     <input type="submit" name="button" id="button" value="Submit" />
