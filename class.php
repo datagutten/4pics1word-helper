@@ -91,6 +91,11 @@ class pics
 	}
 	public function makepicture($task,$sourcepath)
 	{
+		if(!function_exists('imagecreatefromjpeg'))
+		{
+			echo "GD library not available, can not make images<br />\n";
+			return false;
+		}
 		$font='./arial.ttf';
 		if(!file_exists($font))
 			die("The font file $font was not found<br>\n");
@@ -176,6 +181,11 @@ class pics
 				echo "Could not find image file: $rawfile";
 				return false;	
 			}
+			if(!function_exists('imagecopyresampled'))
+			{
+				echo "GD library not available, can not resize images<br />\n";
+				return $rawfile;
+	   		}
 			imagecopyresampled($resized=imagecreatetruecolor(500,500),imagecreatefrompng($rawfile),0,0,0,0,500,500,1024,1024); //Reduce the image size
 			imagepng($resized,$taskimagefile);
 
