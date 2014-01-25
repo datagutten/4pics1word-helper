@@ -126,7 +126,7 @@ class pics
 			{
 				$picturesize=imagesy($im[$key]);
 				$tasksize=$picturesize+$picturesize+30; //The width and height of the task picture is the size of two pictures plus three 10px borders
-				if($pics=2)
+				if($pics==2)
 					$taskimage=imagecreatetruecolor($tasksize,$picturesize+20);
 				else
 					$taskimage=imagecreatetruecolor($tasksize,$tasksize);
@@ -192,7 +192,7 @@ class pics
 
 			return $taskimagefile;
 		}
-		elseif($this->game='piccombo')
+		elseif($this->game=='piccombo')
 			return $this->makepicture($task,$this->imagepath.'raw');
 		
 		return false; //If the function has not returned before, something is wrong
