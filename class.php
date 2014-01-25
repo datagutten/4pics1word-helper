@@ -5,21 +5,14 @@ class pics
 	public $game;
 	public $imagepath;
 	public $datapath;
+	public $games=array("4pics1word"=>"4 Pics 1 Word","icomania"=>"Icomania","piccombo"=>"Pic Combo");
 	function __construct($game)
 	{
-		$this->game=$game;
-		if($game=='4pics1word')
-		{
-			$this->opendb($this->game."/data/itemData.db");
-		}
-		elseif($game!='icomania' && $game!='piccombo')
+		if(!isset($this->games[$game]))
 			die("Invalid game: $game");
+		$this->game=$game;
 		$this->imagepath=$this->game."/images/";
 		$this->datapath=$this->game."/data/";
-	}
-	public function opendb($dbfile)
-	{
-		$this->db=new pdo('sqlite:'.$dbfile);	
 	}
 	public function jsontasks($json,$length) //Get tasks from a json file
 	{
@@ -48,8 +41,9 @@ class pics
 	{
 		if(!isset($this->db))
 		{
-			echo "No database connection\n";
-			return false;	
+			if(!file_exists($dbfile=$this->datapath.$this->game.'.db'))
+				die("Could not find database file $dbfile\n");
+			$this->db=new pdo('sqlite:'.$dbfile);	
 		}
 		if(!is_numeric($length))
 			die("Length must be numeric");

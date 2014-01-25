@@ -46,6 +46,8 @@ if(isset($_POST['button']))
 <?Php
 foreach($games as $key=>$game)
 {
+	if(!file_exists($game)) //Do not display games we don't have data for
+		continue;
 	echo "    <option value=\"$key\"";
 	if($_POST['game']==$key)
 		echo ' selected="selected"';
