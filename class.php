@@ -186,7 +186,8 @@ class pics
 				echo "GD library not available, can not resize images<br />\n";
 				return $rawfile;
 	   		}
-			imagecopyresampled($resized=imagecreatetruecolor(500,500),imagecreatefrompng($rawfile),0,0,0,0,500,500,1024,1024); //Reduce the image size
+			$rawimage=imagecreatefrompng($rawfile);
+			imagecopyresampled($resized=imagecreatetruecolor(500,500),$rawimage,0,0,0,0,500,500,imagesx($rawimage),imagesy($rawimage)); //Reduce the image size
 			imagepng($resized,$taskimagefile);
 
 			return $taskimagefile;
