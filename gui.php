@@ -11,6 +11,7 @@ ini_set('display_errors',1);
 error_reporting(E_ALL);
 require 'class.php';
 
+$games=array("4pics1word"=>"4 Pics 1 Word","icomania"=>"Icomania","piccombo"=>"Pic Combo");
 if(isset($_POST['button']))
 {
 	$gui=true;
@@ -24,8 +25,11 @@ if(isset($_POST['button']))
 		{
 			if($image=$pics->image($task))
 				echo "<p><img src=\"$image\" />\n";
-			
-			echo "<h2>{$task['solution']}</h2></p>\n";
+			if(isset($task['display']))
+				$text=$task['display'];
+			else
+				$text=$task['solution'];
+			echo "<h2>$text</h2></p>\n";
 		}
 	}
 }
@@ -39,9 +43,15 @@ if(isset($_POST['button']))
   </p>
   <p>Game: 
     <select name="game" id="select">
-      <option value="4pics1word" <?php if(!isset($_POST['game']) || $_POST['game']=='4pics1word') echo 'selected="selected"'; ?>>4 Pics 1 Word</option>
-      <option value="icomania"<?php if(isset($_POST['game']) && $_POST['game']=='icomania') echo 'selected="selected"'; ?>>Icomania</option>
-      <option value="piccombo"<?php if(isset($_POST['game']) && $_POST['game']=='piccombo') echo 'selected="selected"'; ?>>Pic Combo</option>
+<?Php
+foreach($games as $key=>$game)
+{
+	echo "    <option value=\"$key\"";
+	if($_POST['game']==$key)
+		echo ' selected="selected"';
+	echo ">$game</option>\n";
+}
+?>
     </select>
   </p>
   <p>
