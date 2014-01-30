@@ -144,6 +144,8 @@ class pics
 	}
 	function downloadpictures($task)
 	{
+		if(!file_exists($this->imagepath."download"))
+			mkdir($this->imagepath."download");	
 		if($this->game=='4pics1word')
 		{
 			for($key=1; $key<=4; $key++)
@@ -180,6 +182,8 @@ class pics
 				echo "GD library not available, can not resize images<br />\n";
 				return $rawfile;
 	   		}
+			if(!file_exists($this->imagepath."tasks"))
+				mkdir($this->imagepath."tasks");
 			$rawimage=imagecreatefrompng($rawfile);
 			imagecopyresampled($resized=imagecreatetruecolor(500,500),$rawimage,0,0,0,0,500,500,imagesx($rawimage),imagesy($rawimage)); //Reduce the image size
 			imagepng($resized,$taskimagefile);
