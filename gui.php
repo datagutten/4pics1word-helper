@@ -2,16 +2,26 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>4pics1word</title>
-</head>
 
-<body>
 <?Php
 ini_set('display_errors',1);
 error_reporting(E_ALL);
 require 'class.php';
 
-$games=array("4pics1word"=>"4 Pics 1 Word","icomania"=>"Icomania","piccombo"=>"Pic Combo");
+//If the request URI contains a valid game, use that
+if(!isset($_POST['game']))
+{
+	$urigame=str_replace('/','',$_SERVER['REQUEST_URI']);
+	$pics=new pics($urigame);
+}
+else
+	$pics=new pics($_POST['game']);
+
+?>
+<title><?Php echo $pics->games[$pics->game]; ?></title>
+</head>
+<body>
+<?php
 if(isset($_POST['button']))
 {
 	$gui=true;
@@ -44,12 +54,12 @@ if(isset($_POST['button']))
   <p>Game: 
     <select name="game" id="select">
 <?Php
-foreach($games as $key=>$game)
+foreach($pics->games as $key=>$game)
 {
 	if(!file_exists($key)) //Do not display games we don't have data for
 		continue;
 	echo "    <option value=\"$key\"";
-	if(isset($_POST['game']) && $_POST['game']==$key)
+	if($pics->game==$key)
 		echo ' selected="selected"';
 	echo ">$game</option>\n";
 }
