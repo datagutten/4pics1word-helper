@@ -3,6 +3,7 @@ class pics
 {
 	public $db;
 	public $game;
+	public $lang='nb';
 	public $imagepath;
 	public $datapath;
 	public $games=array("4pics1word"=>"4 Pics 1 Word","icomania"=>"Icomania","piccombo"=>"Pic Combo");
@@ -41,7 +42,7 @@ class pics
 	{
 		if(!isset($this->db))
 		{
-			if(!file_exists($dbfile=$this->datapath.$this->game.'.db'))
+			if(!file_exists($dbfile=$this->datapath.$this->game.'_'.$this->lang.'.db'))
 				die("Could not find database file $dbfile\n");
 			$this->db=new pdo('sqlite:'.$dbfile);	
 		}
