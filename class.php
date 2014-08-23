@@ -6,7 +6,7 @@ class pics
 	public $lang='nb';
 	public $imagepath;
 	public $datapath;
-	public $games=array("4pics1word"=>"4 Pics 1 Word","icomania"=>"Icomania","piccombo"=>"Pic Combo");
+	public $games=array("4pics1word"=>"4 Pics 1 Word","icomania"=>"Icomania","piccombo"=>"Pic Combo","shadows"=>"Guess the shadow",'megaquiz'=>"Mega quiz");
 	function __construct($game)
 	{
 		if(isset($this->games[$game])) //The specified game is valid, use that
@@ -17,6 +17,7 @@ class pics
 		$this->imagepath=$this->game."/images/";
 		$this->datapath=$this->game."/data/";
 	}
+
 	public function jsontasks($json,$length) //Get tasks from a json file
 	{
 		$alltasks=json_decode($json,true);
@@ -59,21 +60,19 @@ class pics
 	}
 	public function possibles($letters,$length)
 	{
-		if($this->game=='4pics1word')
+		if($this->game=='4pics1word' || $this->game=='shadows' || $this->game=='megaquiz')
 			$tasks=$this->dbtasks($length); //Get all tasks with the specified length
 		elseif($this->game=='icomania' || $this->game=='piccombo')
 			$tasks=$this->jsontasks(file_get_contents($this->game."/data/{$this->game}.json"),$length); //Icomania load tasks from json
 		else
 			die("No tasks for $game");
-
 		$letters_array_base=str_split(strtoupper($letters)); //Make a searchable array of the supplied letters
-
 		foreach ($tasks as $key=>$task)
 		{
 			$letters_array=$letters_array_base;
 			for($pos=0; $pos<$length; $pos++)
 			{
-				if(($letterkey=array_search(substr($task['solution'],$pos,1),$letters_array))===false) //Check if the word contain one the supplied letters
+				if(($letterkey=array_search(substr(strtoupper($task['solution']),$pos,1),$letters_array))===false) //Check if the word contain one the supplied letters
 					continue 2; //The word does not contain one of the supplied letters, try next word
 				unset($letters_array[$letterkey]);
 			}
@@ -176,9 +175,13 @@ class pics
 			else
 				return false;
 		}
-		elseif($this->game=='icomania')
+		elseif($this->game=='icomania' || $this->game=='shadows' || $this->game=="megaquiz")
 		{
-			if(!file_exists($rawfile=$this->imagepath."tasks_raw/_{$task['id']}.png"))
+			if($this->game=='shadows' || $this->game=='megaquiz')
+				$rawfile=$this->imagepath.'/tasks_raw/'.$task['picname'].'.png';
+			elseif($this->game=='icomania')
+				$rawfile=$this->imagepath."tasks_raw/_{$task['id']}.png";
+			if(!file_exists($rawfile))
 			{
 				echo "Could not find image file: $rawfile";
 				return false;	

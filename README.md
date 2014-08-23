@@ -1,7 +1,7 @@
 4pics1word-helper
 =================
 
-A helper to find solutions for the game "4 Pics 1 Word" or "Icomania"
+A helper to find solutions for the games "4 Pics 1 Word", "Icomania", "Pic Combo", "Guess the shadow" or "Mega Quiz"
 
 Some required files are not made by me and you will need to get them other places and copy them to the paths indicated (create the folders):
 arial.ttf: Get it from c:\windows\fonts on a windows computer
