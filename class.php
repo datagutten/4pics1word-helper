@@ -9,9 +9,11 @@ class pics
 	public $games=array("4pics1word"=>"4 Pics 1 Word","icomania"=>"Icomania","piccombo"=>"Pic Combo");
 	function __construct($game)
 	{
-		if(!isset($this->games[$game]))
-			die("Invalid game: $game");
-		$this->game=$game;
+		if(isset($this->games[$game])) //The specified game is valid, use that
+			$this->game=$game;
+		else
+			$this->game='4pics1word'; //The game is not valid, fall back to 4 Pics 1 Word
+
 		$this->imagepath=$this->game."/images/";
 		$this->datapath=$this->game."/data/";
 	}
@@ -61,6 +63,9 @@ class pics
 			$tasks=$this->dbtasks($length); //Get all tasks with the specified length
 		elseif($this->game=='icomania' || $this->game=='piccombo')
 			$tasks=$this->jsontasks(file_get_contents($this->game."/data/{$this->game}.json"),$length); //Icomania load tasks from json
+		else
+			die("No tasks for $game");
+
 		$letters_array_base=str_split(strtoupper($letters)); //Make a searchable array of the supplied letters
 
 		foreach ($tasks as $key=>$task)
