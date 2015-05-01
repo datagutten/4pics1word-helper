@@ -56,7 +56,7 @@ if(isset($_POST['button']))
 <?Php
 foreach($pics->games as $key=>$game)
 {
-	if(!file_exists($key)) //Do not display games we don't have data for
+	if(!file_exists('data/'.$key)) //Do not display games we don't have data for
 		continue;
 	echo "    <option value=\"$key\"";
 	if($pics->game==$key)

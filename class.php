@@ -6,7 +6,8 @@ class pics
 	public $lang='nb';
 	public $imagepath;
 	public $datapath;
-	public $games=array("4pics1word"=>"4 Pics 1 Word","icomania"=>"Icomania","piccombo"=>"Pic Combo","shadows"=>"Guess the shadow",'megaquiz'=>"Mega quiz");
+	public $games=array("4pics1word"=>"4 Pics 1 Word"/*,"icomania"=>"Icomania","piccombo"=>"Pic Combo","shadows"=>"Guess the shadow",'megaquiz'=>"Mega quiz"*/);
+	public $datafile;
 	function __construct($game)
 	{
 		if(isset($this->games[$game])) //The specified game is valid, use that
@@ -14,10 +15,26 @@ class pics
 		else
 			$this->game='4pics1word'; //The game is not valid, fall back to 4 Pics 1 Word
 
-		$this->imagepath=$this->game."/images/";
-		$this->datapath=$this->game."/data/";
+		$this->datapath='data/'.$this->game;
+		$this->imagepath=$this->datapath.'/images';
 		if(isset($_GET['lang']))
 			$this->lang=$_GET['lang'];
+		$this->datafile();
+		//Loop through the games array and remove games without data
+	}
+	public function datafile() //Find correct datafile for current game
+	{		
+		$datafiles=array("4pics1word"=>"itemData.db");
+		
+		$this->datafile=$this->datapath.'/'.$datafiles[$this->game];
+		if(!file_exists($this->datafile))
+			trigger_error("Data file not found: ".$this->datafile,E_USER_ERROR);
+		if(substr($this->datafile,-2,2)=='db')
+		{
+			$this->db=new pdo('sqlite:'.$this->datafile);	
+			if($this->db===false)
+				trigger_error('Could not open database '.$this->datafile,E_USER_ERROR);
+		}
 	}
 
 	public function jsontasks($json,$length) //Get tasks from a json file
@@ -45,15 +62,11 @@ class pics
 	}
 	function dbtasks($length) //Get tasks from a database
 	{
-		if(!isset($this->db))
-		{
-			if(!file_exists($dbfile=$this->datapath.$this->game.'_'.$this->lang.'.db'))
-				die("Could not find database file $dbfile\n");
-			$this->db=new pdo('sqlite:'.$dbfile);	
-		}
 		if(!is_numeric($length))
 			die("Length must be numeric");
 		$st=$this->db->query("SELECT * FROM item WHERE LENGTH(solution)=$length ORDER BY solution");
+		if($st===false)
+			print_r($this->db->errorInfo());
 		$tasks=$st->fetchAll(PDO::FETCH_ASSOC);
 		if(empty($tasks))
 			die("No words found");
@@ -62,7 +75,7 @@ class pics
 	}
 	public function possibles($letters,$length)
 	{
-		if($this->game=='4pics1word' || $this->game=='shadows' || $this->game=='megaquiz')
+		if($this->game=='4pics1word' || $this->game=='shadows' || $this->game=='megaquiz') //4 Pics 1 Word store data in an SQLlite database
 			$tasks=$this->dbtasks($length); //Get all tasks with the specified length
 		elseif($this->game=='icomania' || $this->game=='piccombo')
 			$tasks=$this->jsontasks(file_get_contents($this->game."/data/{$this->game}.json"),$length); //Icomania load tasks from json
@@ -90,7 +103,7 @@ class pics
 		else
 			return $possibles;
 	}
-	public function makepicture($task,$sourcepath=false)
+	public function makepicture($task)
 	{
 		if(!function_exists('imagecreatefromjpeg'))
 		{
@@ -98,15 +111,13 @@ class pics
 			return false;
 		}
 		$font='./arial.ttf';
-		if($sourcepath===false)
-			$sourcepath=$this->imagepath.'/app';
+
+		$sourcepath=$this->imagepath.'/app';
 		if(!file_exists($font))
 			trigger_error("The font file $font was not found",E_USER_ERROR);
-		if(!file_exists($taskpath=$this->imagepath.'tasks/') && !mkdir($taskpath))
-			trigger_error("Unable to create a folder for the generated images, check permissions",E_USER_ERROR);
-		if(!file_exists($sourcepath))
-			trigger_error("Image folder $sourcepath was not found",E_USER_ERROR);
-		$taskimagefile=$taskpath.$task['id'].'.png';
+		if(!file_exists($taskpath=$this->imagepath.'/tasks') && !mkdir($taskpath,0777,true))
+			trigger_error("Unable to create a folder for the generated images ($taskpath), check permissions",E_USER_ERROR);
+		$taskimagefile=$taskpath.'/'.$task['id'].'.png';
 
 		if(file_exists($taskimagefile))
 			return $taskimagefile;
@@ -127,7 +138,7 @@ class pics
 					return false;
 				}
 				else
-					$imagefile=$this->imagepath."download/_{$task['id']}_$key.jpg";
+					$imagefile=$this->imagepath."/download/_{$task['id']}_$key.jpg";
 			}
 			$im[$key]=imagecreatefromjpeg($imagefile);
 			if($key==1)
@@ -163,14 +174,14 @@ class pics
 	{
 		if(!is_array($task))
 			trigger_error("Argument to downloadpictures must be array",E_USER_ERROR);
-		if(!file_exists($this->imagepath."download"))
-			mkdir($this->imagepath."download");	
+		if(!file_exists($this->imagepath."/download"))
+			mkdir($this->imagepath."/download");	
 		if($this->game=='4pics1word')
 		{
 			for($key=1; $key<=4; $key++)
 			{
 				$filename="_{$task['id']}_$key.jpg";
-				$localfile=$this->imagepath."download/$filename";
+				$localfile=$this->imagepath."/download/$filename";
 				if(file_exists($localfile))
 					continue;
 				if(!copy($url="http://4p1w-images.lotum.de/en/$filename",$localfile))
@@ -189,7 +200,7 @@ class pics
 		if(file_exists($taskimagefile=$this->imagepath."tasks/{$task['id']}.png")) //Check if image exists
 			return $taskimagefile;
 		elseif($this->game=='4pics1word' || $this->game=='piccombo')
-			return $this->makepicture($task,$this->imagepath.'app');
+			return $this->makepicture($task);
 		elseif($this->game=='icomania' || $this->game=='shadows' || $this->game=="megaquiz")
 		{
 			if($this->game=='shadows' || $this->game=='megaquiz')
