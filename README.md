@@ -7,9 +7,9 @@ Some required files are not made by me and you will need to get them other place
 arial.ttf: Get it from c:\windows\fonts on a windows computer
 
 The data from the games should be put in a folder named "data".
-Inside that create a folder for each supported game, "4pics1word" and "icomania".
+Inside that create a folder for each supported game, "4pics1word", "icomania", "piccombo", "shadows" and "megaquiz"
 Each folder should contain a data file and a folder named "images" containing all the images from the game.
-The data file for 4 Pics 1 Word is named "photodata.txt", and the file Icomania is named "icomania_en.json".
+The data file for 4 Pics 1 Word is named "itemData.db", and the file Icomania is named "icomania_en.json".
 The pictures for both games has names starting with a undscore followed by a number.
 For 4 Pics 1 Word the pictures are in .jpg format, but for Icomania they are in .png.
 
