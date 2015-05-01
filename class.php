@@ -16,6 +16,8 @@ class pics
 
 		$this->imagepath=$this->game."/images/";
 		$this->datapath=$this->game."/data/";
+		if(isset($_GET['lang']))
+			$this->lang=$_GET['lang'];
 	}
 
 	public function jsontasks($json,$length) //Get tasks from a json file
@@ -88,7 +90,7 @@ class pics
 		else
 			return $possibles;
 	}
-	public function makepicture($task,$sourcepath)
+	public function makepicture($task,$sourcepath=false)
 	{
 		if(!function_exists('imagecreatefromjpeg'))
 		{
@@ -96,29 +98,36 @@ class pics
 			return false;
 		}
 		$font='./arial.ttf';
+		if($sourcepath===false)
+			$sourcepath=$this->imagepath.'/app';
 		if(!file_exists($font))
-			die("The font file $font was not found<br>\n");
-		if(!file_exists($taskpath=$this->imagepath.'tasks/'))
-			if(!mkdir($taskpath))
-				die("Unable to create a folder for the generated images, check permissions<br>\n");
+			trigger_error("The font file $font was not found",E_USER_ERROR);
+		if(!file_exists($taskpath=$this->imagepath.'tasks/') && !mkdir($taskpath))
+			trigger_error("Unable to create a folder for the generated images, check permissions",E_USER_ERROR);
 		if(!file_exists($sourcepath))
-			die("Image folder $sourcepath was not found<br>\n");
+			trigger_error("Image folder $sourcepath was not found",E_USER_ERROR);
 		$taskimagefile=$taskpath.$task['id'].'.png';
-		/*if(file_exists($taskimagefile="taskimages/{$task['id']}.png"))
-			return $taskimagefile;*/
+
+		if(file_exists($taskimagefile))
+			return $taskimagefile;
 		if($this->game=='piccombo')
 			$pics=2;
 		elseif($this->game=='4pics1word')
 			$pics=4;
 		else
 			return false;
-		for($key=1; $key<=$pics; $key++) //Each pictures is $picturesizex$picturesize and there is 10 px between each image
+		for($key=1; $key<=$pics; $key++) //Each picture is $picturesize*$picturesize and there is 10 px between each image
 		{
 			$imagefile="$sourcepath/_{$task['id']}_$key.jpg";
 			if(!file_exists($imagefile))
 			{
-				echo "Image file $imagefile was not found<br>\n";
-				return false;
+				if(!$this->downloadpictures($task))
+				{
+					echo "Image file $imagefile was not found<br>\n";
+					return false;
+				}
+				else
+					$imagefile=$this->imagepath."download/_{$task['id']}_$key.jpg";
 			}
 			$im[$key]=imagecreatefromjpeg($imagefile);
 			if($key==1)
@@ -141,7 +150,10 @@ class pics
 			imagecopy($taskimage,$im[$key],$posx[$key],$posy[$key],0,0,$picturesize,$picturesize);
 			$textypos=$picturesize+$posy[$key]+7+1; //The Y position is the picture size+the image Y position+the font size+1
 			if(!imagettftext($taskimage,7,0,$posx[$key],$textypos,$text,$font,$task['copyright'.$key])) //Write the copyright text on the image
-				die('Error writing copyright text');
+			{
+				trigger_error('Error writing copyright text');
+				return false;
+			}
 		}
 		
 		imagepng($taskimage,$taskimagefile); //PNG makes larger files, but the background looks cleaner
@@ -149,6 +161,8 @@ class pics
 	}
 	function downloadpictures($task)
 	{
+		if(!is_array($task))
+			trigger_error("Argument to downloadpictures must be array",E_USER_ERROR);
 		if(!file_exists($this->imagepath."download"))
 			mkdir($this->imagepath."download");	
 		if($this->game=='4pics1word')
@@ -156,25 +170,26 @@ class pics
 			for($key=1; $key<=4; $key++)
 			{
 				$filename="_{$task['id']}_$key.jpg";
-				copy("http://4p1w-images.lotum.de/en/$filename",$this->imagepath."download/$filename");
+				$localfile=$this->imagepath."download/$filename";
+				if(file_exists($localfile))
+					continue;
+				if(!copy($url="http://4p1w-images.lotum.de/en/$filename",$localfile))
+				{
+					echo "Downloading of $url failed<br />\n";
+					return false;
+				}
 			}
+			return true;
 		}
 		else
 			return false; //Only 4 Pics 1 Word can download pictures
 	}
 	function image($task)
 	{
-		if(file_exists($taskimagefile=$this->imagepath."tasks/{$task['id']}.png"))
+		if(file_exists($taskimagefile=$this->imagepath."tasks/{$task['id']}.png")) //Check if image exists
 			return $taskimagefile;
-		if($this->game=='4pics1word')
-		{
-			if(file_exists($this->imagepath."app/_{$task['id']}_1.jpg"))
-				return $this->makepicture($task,$this->imagepath.'app');
-			elseif(file_exists($this->imagepath."download/_{$task['id']}_1.jpg") || $this->downloadpictures($task)) //Try to download images
-				return $this->makepicture($task,$this->imagepath.'download');
-			else
-				return false;
-		}
+		elseif($this->game=='4pics1word' || $this->game=='piccombo')
+			return $this->makepicture($task,$this->imagepath.'app');
 		elseif($this->game=='icomania' || $this->game=='shadows' || $this->game=="megaquiz")
 		{
 			if($this->game=='shadows' || $this->game=='megaquiz')
@@ -183,8 +198,8 @@ class pics
 				$rawfile=$this->imagepath."tasks_raw/_{$task['id']}.png";
 			if(!file_exists($rawfile))
 			{
-				echo "Could not find image file: $rawfile";
-				return false;	
+				echo "Could not find image file: $rawfile<br />\n";
+				return false;
 			}
 			if(!function_exists('imagecopyresampled'))
 			{
@@ -199,8 +214,6 @@ class pics
 
 			return $taskimagefile;
 		}
-		elseif($this->game=='piccombo')
-			return $this->makepicture($task,$this->imagepath.'raw');
 		
 		return false; //If the function has not returned before, something is wrong
 	}
