@@ -2,16 +2,16 @@
 //Build database for guess the shadow or mega quiz
 if(!isset($argv[1]) || !isset($argv[2]))
 	die("Usage: builddatabase.php [game] [language]\n");
-$game=$argv[1];
-$lang=$argv[2];
-$data=file_get_contents("$game/data/levels_$lang.txt");
+//$game=$argv[1];
+//$lang=$argv[2];
+$data=file_get_contents($argv[1]);
 $data=str_replace("\r",'',$data);
 //                         2                   3              4             5
 preg_match_all('^(level\=(.+)\nother_letters=(.*)\ncategory=(.+)\npicname=(.+))\n\n^',$data,$tasks); //other_letters\=(.+).+\n\n
 //print_r($tasks);
 //die();
 //$db=new pdo("sqlite:$game/data/shadows.db");
-$db=new pdo("sqlite:/tmp/$game.db");
+$db=new pdo("sqlite:/tmp/game.db");
 $q="CREATE TABLE `item` (
   `id` INT NOT NULL,
   `solution` VARCHAR(45) NULL,
@@ -41,5 +41,6 @@ foreach(array_keys($tasks[0]) as $key)
 }
 
 //$db->query("CREATE TABLE shadows (solution
-copy("/tmp/$game.db","$game/data/{$game}_{$lang}.db");
-unlink("/tmp/$game.db");
+//copy("/tmp/$game.db","$game/data/{$game}_{$lang}.db");
+rename("/tmp/game.db",$argv[2]);
+//unlink("/tmp/game.db");
