@@ -4,8 +4,9 @@ class pics
 	public $db;
 	public $game;
 	public $lang='nb';
-	public $imagepath;
-	public $datapath;
+	public $dir_data='data'; //Directory for game data and images
+	public $dir_gamedata; //Subdir for game data for current game
+	public $dir_images; //Subdir for images for current game
 	public $games=array("4pics1word"=>"4 Pics 1 Word"/*,"icomania"=>"Icomania","piccombo"=>"Pic Combo","shadows"=>"Guess the shadow",'megaquiz'=>"Mega quiz"*/);
 	public $datafile;
 	function __construct($game)
@@ -15,8 +16,8 @@ class pics
 		else
 			$this->game='4pics1word'; //The game is not valid, fall back to 4 Pics 1 Word
 
-		$this->datapath='data/'.$this->game;
-		$this->imagepath=$this->datapath.'/images';
+		$this->dir_gamedata=$this->dir_data.'/'.$this->game.'/gamedata';
+		$this->dir_images=$this->dir_data.'/'.$this->game.'/images';
 		if(isset($_GET['lang']))
 			$this->lang=$_GET['lang'];
 		$this->datafile();
@@ -26,7 +27,7 @@ class pics
 	{		
 		$datafiles=array("4pics1word"=>"itemData.db");
 		
-		$this->datafile=$this->datapath.'/'.$datafiles[$this->game];
+		$this->datafile=$this->dir_gamedata.'/'.$datafiles[$this->game];
 		if(!file_exists($this->datafile))
 			trigger_error("Data file not found: ".$this->datafile,E_USER_ERROR);
 		if(substr($this->datafile,-2,2)=='db')
@@ -112,10 +113,10 @@ class pics
 		}
 		$font='./arial.ttf';
 
-		$sourcepath=$this->imagepath.'/app';
+		$sourcepath=$this->dir_images.'/app';
 		if(!file_exists($font))
 			trigger_error("The font file $font was not found",E_USER_ERROR);
-		if(!file_exists($taskpath=$this->imagepath.'/tasks') && !mkdir($taskpath,0777,true))
+		if(!file_exists($taskpath=$this->dir_images.'/tasks') && !mkdir($taskpath,0777,true))
 			trigger_error("Unable to create a folder for the generated images ($taskpath), check permissions",E_USER_ERROR);
 		$taskimagefile=$taskpath.'/'.$task['id'].'.png';
 
@@ -138,7 +139,7 @@ class pics
 					return false;
 				}
 				else
-					$imagefile=$this->imagepath."/download/_{$task['id']}_$key.jpg";
+					$imagefile=$this->dir_images."/download/_{$task['id']}_$key.jpg";
 			}
 			$im[$key]=imagecreatefromjpeg($imagefile);
 			if($key==1)
@@ -174,14 +175,14 @@ class pics
 	{
 		if(!is_array($task))
 			trigger_error("Argument to downloadpictures must be array",E_USER_ERROR);
-		if(!file_exists($this->imagepath."/download"))
-			mkdir($this->imagepath."/download");	
+		if(!file_exists($this->dir_images."/download"))
+			mkdir($this->dir_images."/download");	
 		if($this->game=='4pics1word')
 		{
 			for($key=1; $key<=4; $key++)
 			{
 				$filename="_{$task['id']}_$key.jpg";
-				$localfile=$this->imagepath."/download/$filename";
+				$localfile=$this->dir_images."/download/$filename";
 				if(file_exists($localfile))
 					continue;
 				if(!copy($url="http://4p1w-images.lotum.de/en/$filename",$localfile))
@@ -197,16 +198,16 @@ class pics
 	}
 	function image($task)
 	{
-		if(file_exists($taskimagefile=$this->imagepath."tasks/{$task['id']}.png")) //Check if image exists
+		if(file_exists($taskimagefile=$this->dir_images."tasks/{$task['id']}.png")) //Check if image exists
 			return $taskimagefile;
 		elseif($this->game=='4pics1word' || $this->game=='piccombo')
 			return $this->makepicture($task);
 		elseif($this->game=='icomania' || $this->game=='shadows' || $this->game=="megaquiz")
 		{
 			if($this->game=='shadows' || $this->game=='megaquiz')
-				$rawfile=$this->imagepath.'/tasks_raw/'.$task['picname'].'.png';
+				$rawfile=$this->dir_images.'/tasks_raw/'.$task['picname'].'.png';
 			elseif($this->game=='icomania')
-				$rawfile=$this->imagepath."tasks_raw/_{$task['id']}.png";
+				$rawfile=$this->dir_images."tasks_raw/_{$task['id']}.png";
 			if(!file_exists($rawfile))
 			{
 				echo "Could not find image file: $rawfile<br />\n";
@@ -217,8 +218,8 @@ class pics
 				echo "GD library not available, can not resize images<br />\n";
 				return $rawfile;
 	   		}
-			if(!file_exists($this->imagepath."tasks"))
-				mkdir($this->imagepath."tasks");
+			if(!file_exists($this->dir_images."tasks"))
+				mkdir($this->dir_images."tasks");
 			$rawimage=imagecreatefrompng($rawfile);
 			imagecopyresampled($resized=imagecreatetruecolor(500,500),$rawimage,0,0,0,0,500,500,imagesx($rawimage),imagesy($rawimage)); //Reduce the image size
 			imagepng($resized,$taskimagefile);
