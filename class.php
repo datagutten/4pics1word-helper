@@ -198,16 +198,16 @@ class pics
 	}
 	function image($task)
 	{
-		if(file_exists($taskimagefile=$this->dir_images."tasks/{$task['id']}.png")) //Check if image exists
+		if(file_exists($taskimagefile=$this->dir_images."/tasks/{$task['id']}.png")) //Check if image exists
 			return $taskimagefile;
 		elseif($this->game=='4pics1word' || $this->game=='piccombo')
 			return $this->makepicture($task);
 		elseif($this->game=='icomania' || $this->game=='shadows' || $this->game=="megaquiz")
 		{
 			if($this->game=='shadows' || $this->game=='megaquiz')
-				$rawfile=$this->dir_images.'/tasks_raw/'.$task['picname'].'.png';
+				$rawfile=$this->dir_images.'/app/'.$task['picname'].'.png';
 			elseif($this->game=='icomania')
-				$rawfile=$this->dir_images."tasks_raw/_{$task['id']}.png";
+				$rawfile=$this->dir_images."/app/_{$task['id']}.png";
 			if(!file_exists($rawfile))
 			{
 				echo "Could not find image file: $rawfile<br />\n";
@@ -218,8 +218,8 @@ class pics
 				echo "GD library not available, can not resize images<br />\n";
 				return $rawfile;
 	   		}
-			if(!file_exists($this->dir_images."tasks"))
-				mkdir($this->dir_images."tasks");
+			if(!file_exists($this->dir_images."/tasks"))
+				mkdir($this->dir_images."/tasks");
 			$rawimage=imagecreatefrompng($rawfile);
 			imagecopyresampled($resized=imagecreatetruecolor(500,500),$rawimage,0,0,0,0,500,500,imagesx($rawimage),imagesy($rawimage)); //Reduce the image size
 			imagepng($resized,$taskimagefile);
