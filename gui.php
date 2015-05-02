@@ -7,25 +7,30 @@
 ini_set('display_errors',1);
 error_reporting(E_ALL);
 require 'class.php';
+$pics=new pics;
+$gamelist=$pics->gamelist(); //Get the game list
 
-//If the request URI contains a valid game, use that
-if(!isset($_POST['game']))
+
+if(!isset($pics->game)) //If the request URI contains a valid game, use that
 {
 	$urigame=str_replace('/','',$_SERVER['REQUEST_URI']);
-	$pics=new pics($urigame);
+	if(isset($gamelist[$urigame]))
+		$pics->selectgame($urigame);
 }
-else
-	$pics=new pics($_POST['game']);
+
+if(isset($_POST['game'])) //Game in POST always overrides URI
+	$pics->selectgame($_POST['game']);
+
 
 ?>
-<title><?Php echo $pics->games[$pics->game]; ?></title>
+<title><?Php echo (isset($pics->game) ? $gamelist[$pics->game] :"Select game"); ?></title>
 </head>
 <body>
 <?php
+
 if(isset($_POST['button']))
 {
 	$gui=true;
-	$pics=new pics($_POST['game']);
 	$queryletters=strtoupper(preg_replace('/[^a-z]/i','',$_POST['letters'])); //Remove everything that is not a-z and make the string uppercase
 	$letters=$_POST['number'];
 
@@ -43,6 +48,11 @@ if(isset($_POST['button']))
 		}
 	}
 }
+
+if($gamelist===false)
+	echo "No game data";
+else
+{
 ?>
 <form id="form1" name="form1" method="post" action="">
   <p>Available letters:
@@ -51,13 +61,15 @@ if(isset($_POST['button']))
   <p>Number of letters:
     <input type="text" name="number" id="number" />
   </p>
+	<?Php
+	if(!isset($pics->game) || count($gamelist)>1)
+	{
+	?>
   <p>Game: 
     <select name="game" id="select">
 <?Php
-foreach($pics->games as $key=>$game)
+foreach($gamelist as $key=>$game)
 {
-	if(!file_exists('data/'.$key)) //Do not display games we don't have data for
-		continue;
 	echo "    <option value=\"$key\"";
 	if($pics->game==$key)
 		echo ' selected="selected"';
@@ -66,9 +78,17 @@ foreach($pics->games as $key=>$game)
 ?>
     </select>
   </p>
+  <?Php
+	}
+	else
+		echo '<input type="hidden" name="game" value="'.$pics->game.'">';
+	?>
   <p>
     <input type="submit" name="button" id="button" value="Submit" />
   </p>
+  <?php
+}
+?>
   <p>Source code available on <a href="https://github.com/datagutten/4pics1word-helper/">github</a>.</p>
 </form>
 </body>

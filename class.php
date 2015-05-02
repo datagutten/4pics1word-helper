@@ -7,35 +7,45 @@ class pics
 	public $dir_data='data'; //Directory for game data and images
 	public $dir_gamedata; //Subdir for game data for current game
 	public $dir_images; //Subdir for images for current game
-	public $games=array("4pics1word"=>"4 Pics 1 Word"/*,"icomania"=>"Icomania","piccombo"=>"Pic Combo","shadows"=>"Guess the shadow",'megaquiz'=>"Mega quiz"*/);
-	public $datafile;
-	function __construct($game)
-	{
-		if(isset($this->games[$game])) //The specified game is valid, use that
-			$this->game=$game;
-		else
-			$this->game='4pics1word'; //The game is not valid, fall back to 4 Pics 1 Word
+	private $games=array("4pics1word"=>"4 Pics 1 Word","icomania"=>"Icomania","piccombo"=>"Pic Combo","shadows"=>"Guess the shadow"/*,'megaquiz'=>"Mega quiz"*/); //Use selectgame()
+	public $datafiles=array("4pics1word"=>"itemData.db",'icomania'=>'icomania_en.json','piccombo'=>'itemdata.json','shadows'=>'levels_en.db');
 
-		$this->dir_gamedata=$this->dir_data.'/'.$this->game.'/gamedata';
-		$this->dir_images=$this->dir_data.'/'.$this->game.'/images';
+	public $datafile;
+	function __construct()
+	{
 		if(isset($_GET['lang']))
 			$this->lang=$_GET['lang'];
-		$this->datafile();
-		//Loop through the games array and remove games without data
 	}
-	public function datafile() //Find correct datafile for current game
-	{		
-		$datafiles=array("4pics1word"=>"itemData.db");
+	public function selectgame($game)
+	{
+		if(!isset($this->games[$game]))
+			return false;
+		else
+			$this->game=$game;
+		$this->dir_gamedata=$this->dir_data.'/'.$this->game.'/gamedata';
+		$this->dir_images=$this->dir_data.'/'.$this->game.'/images';
+		$this->datafile=$this->dir_gamedata.'/'.$this->datafiles[$this->game];
 		
-		$this->datafile=$this->dir_gamedata.'/'.$datafiles[$this->game];
-		if(!file_exists($this->datafile))
-			trigger_error("Data file not found: ".$this->datafile,E_USER_ERROR);
-		if(substr($this->datafile,-2,2)=='db')
+		return $this->games[$game]; //Return the game name
+	}
+	public function gamelist()
+	{
+		foreach($this->datafiles as $game=>$datafile) //Check if data files exist
 		{
-			$this->db=new pdo('sqlite:'.$this->datafile);	
-			if($this->db===false)
-				trigger_error('Could not open database '.$this->datafile,E_USER_ERROR);
+			if(!file_exists($this->dir_data.'/'.$game.'/gamedata/'.$datafile))
+				unset($this->games[$game]); //Remove games with no data from game liste
 		}
+		if(empty($this->games)) //No game data found
+			return false;
+		elseif(count($this->games)==1)
+		{
+			$keys=array_keys($this->games);
+			$this->game=$keys[0];
+			$this->selectgame($this->game);
+			return array($this->game=>$this->games[$this->game]);
+		}
+		else
+			return $this->games;
 	}
 
 	public function jsontasks($json,$length) //Get tasks from a json file
@@ -61,8 +71,19 @@ class pics
 		else
 			return $outtasks;
 	}
+	public function opendb()
+	{
+		if(substr($this->datafile,-2,2)=='db')
+		{
+			$this->db=new pdo('sqlite:'.$this->datafile);	
+			if($this->db===false)
+				trigger_error('Could not open database '.$this->datafile,E_USER_ERROR);
+		}
+	}
 	function dbtasks($length) //Get tasks from a database
 	{
+		if(!isset($this->db))
+			$this->opendb();
 		if(!is_numeric($length))
 			die("Length must be numeric");
 		$st=$this->db->query("SELECT * FROM item WHERE LENGTH(solution)=$length ORDER BY solution");
@@ -79,7 +100,7 @@ class pics
 		if($this->game=='4pics1word' || $this->game=='shadows' || $this->game=='megaquiz') //4 Pics 1 Word store data in an SQLlite database
 			$tasks=$this->dbtasks($length); //Get all tasks with the specified length
 		elseif($this->game=='icomania' || $this->game=='piccombo')
-			$tasks=$this->jsontasks(file_get_contents($this->game."/data/{$this->game}.json"),$length); //Icomania load tasks from json
+			$tasks=$this->jsontasks(file_get_contents($this->datafile),$length); //Icomania load tasks from json
 		else
 			die("No tasks for $game");
 		$letters_array_base=str_split(strtoupper($letters)); //Make a searchable array of the supplied letters
