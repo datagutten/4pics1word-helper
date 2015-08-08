@@ -31,7 +31,6 @@ if(isset($_GET['locale']))
 
 $gamelist=$pics->gamelist(); //Get the game list
 
-
 if(!isset($pics->game)) //If the request URI contains a valid game, use that
 {
 	$urigame=str_replace('/','',$_SERVER['REQUEST_URI']);
@@ -86,44 +85,41 @@ if($gamelist===false)
 }
 else
 {
-?>
+	?>
 	<form id="form1" name="form1" method="post">
 		<label for="letters"><?Php echo _('Available letters:');?></label>
-    	<input name="letters" type="text" id="letters" />
+		<input name="letters" type="text" id="letters" />
 
 		<label for="length"><?Php echo _('Number of letters:');?></label>
 		<input name="length" type="number" id="length" min="1" size="2" max="99"/>
-
-	<?Php
-	if(!isset($pics->game) || count($gamelist)>1)
-	{
-	?>
-
-    <label for="game"><?Php echo _('Game:');  ?></label>
-    <select name="game" id="game">
-<?Php
-foreach($gamelist as $key=>$game)
-{
-	echo "    <option value=\"$key\"";
-	if($pics->game==$key)
-		echo ' selected="selected"';
-	echo ">$game</option>\n";
-}
-?>
-    </select>
-
-  <?Php
+		<?Php
+		if(!isset($pics->game) || count($gamelist)>1)
+		{
+			?>
+			<label for="game"><?Php echo _('Game:');  ?></label>
+			<select name="game" id="game">
+				<?Php
+				foreach($gamelist as $key=>$game)
+				{
+					echo "<option value=\"$key\"";
+					if($pics->game==$key)
+						echo ' selected="selected"';
+					echo ">$game</option>\n";
+				}
+				?>
+			</select>
+			<?Php
+		}
+		else
+			echo '<input type="hidden" name="game" value="'.$pics->game.'">';
+		?>
+		<p>
+			<input type="submit" name="button" id="button" value="<?Php echo _('Find solution'); ?>" />
+		</p>
+	</form>
+	<?php
 	}
-	else
-		echo '<input type="hidden" name="game" value="'.$pics->game.'">';
-	?>
-  <p>
-    <input type="submit" name="button" id="button" value="<?Php echo _('Find solution'); ?>" />
-  </p>
-  <?php
-}
+	echo '<p>'.sprintf(_('Source code available on %s'),'<a href="https://github.com/datagutten/4pics1word-helper/">github</a>').'</p>';
 ?>
-  <p><?Php echo sprintf(_('Source code available on %s'),'<a href="https://github.com/datagutten/4pics1word-helper/">github</a>');?></p>
-</form>
 </body>
 </html>
