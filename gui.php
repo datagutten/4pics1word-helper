@@ -19,6 +19,9 @@ body {
 .error {
 	color:#FF0000;
 }
+input, label {
+    display:block;
+}	
 </style>
 <?Php
 require 'class.php';
@@ -41,7 +44,7 @@ if(isset($_POST['game'])) //Game in POST always overrides URI
 
 
 ?>
-<title><?Php echo (isset($pics->game) ? $gamelist[$pics->game] :"Select game"); ?></title>
+<title><?Php echo (isset($pics->game) ? $gamelist[$pics->game] :_("Select game")); ?></title>
 </head>
 <body>
 <?php
@@ -78,23 +81,26 @@ if(isset($_POST['button']))
 }
 
 if($gamelist===false)
-	echo "No game data";
+{
+	$pics->error(_("Missing game data"));
+}
 else
 {
 ?>
-<form id="form1" name="form1" method="post">
-  <p>Available letters:
-    <input type="text" name="letters" id="letters" />
-  </p>
-  <p>Number of letters:
-    <input type="text" name="length" id="length" />
-  </p>
+	<form id="form1" name="form1" method="post">
+		<label for="letters"><?Php echo _('Available letters:');?></label>
+    	<input name="letters" type="text" id="letters" />
+
+		<label for="length"><?Php echo _('Number of letters:');?></label>
+		<input name="length" type="number" id="length" min="1" size="2" max="99"/>
+
 	<?Php
 	if(!isset($pics->game) || count($gamelist)>1)
 	{
 	?>
-  <p>Game: 
-    <select name="game" id="select">
+
+    <label for="game"><?Php echo _('Game:');  ?></label>
+    <select name="game" id="game">
 <?Php
 foreach($gamelist as $key=>$game)
 {
@@ -105,19 +111,19 @@ foreach($gamelist as $key=>$game)
 }
 ?>
     </select>
-  </p>
+
   <?Php
 	}
 	else
 		echo '<input type="hidden" name="game" value="'.$pics->game.'">';
 	?>
   <p>
-    <input type="submit" name="button" id="button" value="Submit" />
+    <input type="submit" name="button" id="button" value="<?Php echo _('Find solution'); ?>" />
   </p>
   <?php
 }
 ?>
-  <p>Source code available on <a href="https://github.com/datagutten/4pics1word-helper/">github</a>.</p>
+  <p><?Php echo sprintf(_('Source code available on %s'),'<a href="https://github.com/datagutten/4pics1word-helper/">github</a>');?></p>
 </form>
 </body>
 </html>
