@@ -9,11 +9,19 @@ class pics
 	public $dir_data='data'; //Directory for game data and images
 	public $dir_gamedata; //Subdir for game data for current game
 	public $dir_images; //Subdir for images for current game
-	private $games=array("4pics1word"=>"4 Pics 1 Word","icomania"=>"Icomania","piccombo"=>"Pic Combo","shadows"=>"Guess the shadow"/*,'megaquiz'=>"Mega quiz"*/); //Use selectgame()
+	private $games; //Use selectgame() to get game list
 	public $datafiles=array("4pics1word"=>"itemData.db",'icomania'=>'icomania_en.json','piccombo'=>'itemdata.json','shadows'=>'levels_en.db');
 
 	public $datafile;
 
+	function __construct()
+	{
+		$this->games=array(	"4pics1word"=>_("4 Pics 1 Word"),
+							"icomania"=>_("Icomania"),
+							"piccombo"=>_("Pic Combo"),
+							"shadows"=>_("Guess the shadow")/*,
+							"megaquiz"=>_("Mega quiz")*/);
+	}
 	public function error($string)
 	{
 		echo "<div class=\"error\">$string</div>\n";
