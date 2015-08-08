@@ -43,10 +43,20 @@ if(isset($_POST['game'])) //Game in POST always overrides URI
 if(isset($_POST['button']))
 {
 	$gui=true;
-	$queryletters=strtoupper(preg_replace('/[^a-z]/i','',$_POST['letters'])); //Remove everything that is not a-z and make the string uppercase
-	$letters=$_POST['number'];
+	if(is_numeric($_POST['letters']) && !is_numeric($_POST['length'])) //Swapped arguments
+	{
+		$letters=$_POST['length'];
+		$length=$_POST['letters'];
+	}
+	else
+	{
+		$letters=$_POST['letters'];
+		$length=$_POST['length'];
+	}
 
-	if($possibles=$pics->possibles($queryletters,$_POST['number']))
+	$queryletters=strtoupper(preg_replace('/[^a-z]/i','',$letters)); //Remove everything that is not a-z and make the string uppercase
+
+	if($possibles=$pics->possibles($queryletters,$length))
 	{
 		foreach ($possibles as $key=>$task)
 		{
@@ -71,7 +81,7 @@ else
     <input type="text" name="letters" id="letters" />
   </p>
   <p>Number of letters:
-    <input type="text" name="number" id="number" />
+    <input type="text" name="length" id="length" />
   </p>
 	<?Php
 	if(!isset($pics->game) || count($gamelist)>1)
