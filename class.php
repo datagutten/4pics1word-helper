@@ -9,18 +9,17 @@ class pics
 	public $dir_data='data'; //Directory for game data and images
 	public $dir_gamedata; //Subdir for game data for current game
 	public $dir_images; //Subdir for images for current game
-	private $games; //Use selectgame() to get game list
-	public $datafiles=array("4pics1word"=>"itemData.db",'icomania'=>'icomania_en.json','piccombo'=>'itemdata.json','shadows'=>'levels_en.db');
-
+	private $games=array(	'4pics1word'=>'4 Pics 1 Word',
+							'icomania'=>'Icomania',
+							'piccombo'=>'Pic Combo',
+							'shadows'=>'Guess the shadow',
+							'megaquiz'=>'Mega Quiz'); //Use selectgame() to get game list
+	public $datafiles=array("4pics1word"=>"itemData.db",'icomania'=>'icomania_en.json','piccombo'=>'itemdata.json','shadows'=>'levels_en.db','megaquiz'=>'levels_en.db');
+	public $datafiles_multilang=array('icomania'=>'icomania_%s.json','shadows'=>'levels_%s.db','megaquiz'=>'levels_%s.db');
 	public $datafile;
 
 	function __construct()
 	{
-		$this->games=array(	"4pics1word"=>_("4 Pics 1 Word"),
-							"icomania"=>_("Icomania"),
-							"piccombo"=>_("Pic Combo"),
-							"shadows"=>_("Guess the shadow")/*,
-							"megaquiz"=>_("Mega quiz")*/);
 	}
 	public function error($string)
 	{
@@ -55,6 +54,12 @@ class pics
 		$this->dir_gamedata=$this->dir_data.'/'.$this->game.'/gamedata';
 		$this->dir_images=$this->dir_data.'/'.$this->game.'/images';
 		$this->datafile=$this->dir_gamedata.'/'.$this->datafiles[$this->game];
+		if(isset($this->datafiles_multilang[$game])) //Check if file exists in local language
+		{
+			$file=sprintf($this->datafiles_multilang[$game],$this->lang);
+			if(file_exists($datafile=$this->dir_gamedata.'/'.$file))
+				$this->datafile=$datafile;
+		}
 		
 		return $this->games[$game]; //Return the game name
 	}
@@ -64,6 +69,8 @@ class pics
 		{
 			if(!file_exists($this->dir_data.'/'.$game.'/gamedata/'.$datafile))
 				unset($this->games[$game]); //Remove games with no data from game liste
+			else
+				$this->games[$game]=gettext($this->games[$game]); //Replace the game name with a localized name
 		}
 		if(empty($this->games)) //No game data found
 			return false;
