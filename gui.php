@@ -16,6 +16,9 @@ body {
 	margin-left:auto;
 	margin-right:auto;
 }
+.error {
+	color:#FF0000;
+}
 </style>
 <?Php
 require 'class.php';

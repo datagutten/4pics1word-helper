@@ -16,6 +16,10 @@ class pics
 		if(isset($_GET['lang']))
 			$this->lang=$_GET['lang'];
 	}
+	public function error($string)
+	{
+		echo "<div class=\"error\">$string</div>\n";
+	}
 	public function selectgame($game)
 	{
 		if(!isset($this->games[$game]))
