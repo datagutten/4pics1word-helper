@@ -1,11 +1,23 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE HTML>
+<html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<style type="text/css">
+body {
+	margin-left:auto;
+	margin-right:auto;
+	max-width:500px;
+}
+.solution {
+	max-width:90%;
+}
+.center {
+	margin-left:auto;
+	margin-right:auto;
+}
+</style>
 <?Php
-ini_set('display_errors',1);
-error_reporting(E_ALL);
 require 'class.php';
 $pics=new pics;
 $gamelist=$pics->gamelist(); //Get the game list
@@ -39,7 +51,7 @@ if(isset($_POST['button']))
 		foreach ($possibles as $key=>$task)
 		{
 			if($image=$pics->image($task))
-				echo "<p><img src=\"$image\" />\n";
+				echo "<p><img src=\"$image\" class=\"solution\"/>\n";
 			if(isset($task['display']))
 				$text=$task['display'];
 			else
