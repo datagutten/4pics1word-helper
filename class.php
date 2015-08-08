@@ -24,7 +24,10 @@ class pics
 	}
 	public function error($string)
 	{
-		echo "<div class=\"error\">$string</div>\n";
+		if(isset($_GET))
+			echo "<div class=\"error\">$string</div>\n";
+		else
+			trigger_error($string);
 	}
 	public function set_locale($locale)
 	{
