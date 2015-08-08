@@ -114,21 +114,39 @@ class pics
 		{
 			$this->db=new pdo('sqlite:'.$this->datafile);	
 			if($this->db===false)
-				trigger_error('Could not open database '.$this->datafile,E_USER_ERROR);
+			{
+				$this->error(_('Could not open database '));
+				trigger_error('Could not open database '.$this->datafile,E_USER_WARNING);
+				return false;
+			}
 		}
 	}
 	function dbtasks($length) //Get tasks from a database
 	{
 		if(!isset($this->db))
-			$this->opendb();
+		{
+			if($this->opendb()===false)
+				return false;
+		}
 		if(!is_numeric($length))
-			die("Length must be numeric");
+		{
+			$this->error(_("Length must be numeric"));
+			return false;
+		}
 		$st=$this->db->query("SELECT * FROM item WHERE LENGTH(solution)=$length ORDER BY solution");
 		if($st===false)
-			print_r($this->db->errorInfo());
+		{
+			$this->error(_("Error fetching tasks from database"));
+			$errorinfo=$this->db->errorInfo();
+			trigger_error("Error fetching tasks from database: {$errorinfo[2]}",E_USER_WARNING);
+			return false;
+		}
 		$tasks=$st->fetchAll(PDO::FETCH_ASSOC);
 		if(empty($tasks))
-			die("No words found");
+		{
+			$this->error(_("No words found"));
+			return false;
+		}
 
 		return $tasks;
 	}
@@ -139,7 +157,13 @@ class pics
 		elseif($this->game=='icomania' || $this->game=='piccombo')
 			$tasks=$this->jsontasks(file_get_contents($this->datafile),$length); //Icomania load tasks from json
 		else
-			die("No tasks for $game");
+		{
+			$this->error(sprintf(_("No tasks for %s"),$game));
+			return false;
+		}
+		if($tasks===false)
+			return false;
+
 		$letters_array_base=str_split(strtoupper($letters)); //Make a searchable array of the supplied letters
 		foreach ($tasks as $key=>$task)
 		{
@@ -156,7 +180,7 @@ class pics
 		
 		if(!isset($possibles))
 		{
-			echo "No $length letter word containing the letters \"$letters\" was found\n";
+			$this->error(sprintf(_('No %d letter word containing the letters "%s" was found'),$length,$letters));
 			return false;
 		}
 		else
@@ -166,16 +190,24 @@ class pics
 	{
 		if(!function_exists('imagecreatefromjpeg'))
 		{
-			echo "GD library not available, can not make images<br />\n";
+			echo _("GD library not available, can not make images")."<br />\n";
 			return false;
 		}
 		$font='./arial.ttf';
 
 		$sourcepath=$this->dir_images.'/app';
 		if(!file_exists($font))
-			trigger_error("The font file $font was not found",E_USER_ERROR);
+		{
+			$this->error(_($err=sprintf("The font file %s was not found",$font)));
+			trigger_error($err,E_USER_WARNING);
+			return false;
+		}
 		if(!file_exists($taskpath=$this->dir_images.'/tasks') && !mkdir($taskpath,0777,true))
-			trigger_error("Unable to create a folder for the generated images ($taskpath), check permissions",E_USER_ERROR);
+		{
+			$this->error(_($err=sprintf("Unable to create a folder for the generated images (%s), check permissions",$taskpath)));
+			trigger_error($err,E_USER_WARNING);
+			return false;
+		}
 		$taskimagefile=$taskpath.'/'.$task['id'].'.png';
 
 		if(file_exists($taskimagefile))
@@ -273,7 +305,7 @@ class pics
 			}
 			if(!function_exists('imagecopyresampled'))
 			{
-				echo "GD library not available, can not resize images<br />\n";
+				$this->error(_("GD library not available, can not resize images"));
 				return $rawfile;
 	   		}
 			if(!file_exists($this->dir_images."/tasks"))
