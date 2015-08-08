@@ -3,7 +3,9 @@ class pics
 {
 	public $db;
 	public $game;
-	public $lang='nb';
+	public $lang;
+	public $locale_path='./locale';
+	public $locale;
 	public $dir_data='data'; //Directory for game data and images
 	public $dir_gamedata; //Subdir for game data for current game
 	public $dir_images; //Subdir for images for current game
@@ -11,15 +13,28 @@ class pics
 	public $datafiles=array("4pics1word"=>"itemData.db",'icomania'=>'icomania_en.json','piccombo'=>'itemdata.json','shadows'=>'levels_en.db');
 
 	public $datafile;
-	function __construct()
-	{
-		if(isset($_GET['lang']))
-			$this->lang=$_GET['lang'];
-	}
+
 	public function error($string)
 	{
 		echo "<div class=\"error\">$string</div>\n";
 	}
+	public function set_locale($locale)
+	{
+		if(!file_exists($file=$this->locale_path."/$locale/LC_MESSAGES/helper.mo"))
+		{
+			$this->error(sprintf(_("No translation found for locale %s. It should be placed in %s"),$locale,$file));
+			return false;
+		}
+		putenv('LC_ALL='.$locale);
+		setlocale(LC_ALL,$locale);
+		// Specify location of translation tables
+		bindtextdomain("helper", "./locale");
+		// Choose domain
+		textdomain("helper");
+
+		$this->lang=preg_replace('/([a-z]+)_.+/','$1',$locale); //Get the language from the locale
+	}
+
 	public function selectgame($game)
 	{
 		if(!isset($this->games[$game]))

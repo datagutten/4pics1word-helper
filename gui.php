@@ -23,6 +23,9 @@ body {
 <?Php
 require 'class.php';
 $pics=new pics;
+if(isset($_GET['locale']))
+	$pics->set_locale($_GET['locale']);
+
 $gamelist=$pics->gamelist(); //Get the game list
 
 
@@ -79,7 +82,7 @@ if($gamelist===false)
 else
 {
 ?>
-<form id="form1" name="form1" method="post" action="">
+<form id="form1" name="form1" method="post">
   <p>Available letters:
     <input type="text" name="letters" id="letters" />
   </p>
